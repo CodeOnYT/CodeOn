@@ -1,0 +1,460 @@
+<!DOCTYPE html><html lang="[&quot;zh-CN&quot;,&quot;en&quot;,&quot;zh-HK&quot;,&quot;zh-TW&quot;,&quot;default&quot;]" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>X.509 数字证书与 SSL/TLS | Jckling's Blog</title><meta name="keywords" content="X.509,TLS,SSL"><meta name="author" content="Jckling"><meta name="copyright" content="Jckling"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="X.509 数字证书常见格式，国密数字证书模板；TLS&#x2F;SSL 原理，国密 TLS 双向认证；FISCO BCOS 与 Fabric 中的数字证书，典型 PKI 架构。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="X.509 数字证书与 SSL&#x2F;TLS">
+<meta property="og:url" content="https://jckling.github.io/2020/10/12/Notes/GB/%E8%AF%81%E4%B9%A6%E7%9B%B8%E5%85%B3/index.html">
+<meta property="og:site_name" content="Jckling&#39;s Blog">
+<meta property="og:description" content="X.509 数字证书常见格式，国密数字证书模板；TLS&#x2F;SSL 原理，国密 TLS 双向认证；FISCO BCOS 与 Fabric 中的数字证书，典型 PKI 架构。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg">
+<meta property="article:published_time" content="2020-10-12T13:24:54.000Z">
+<meta property="article:modified_time" content="2021-11-23T14:04:58.777Z">
+<meta property="article:author" content="Jckling">
+<meta property="article:tag" content="X.509">
+<meta property="article:tag" content="TLS">
+<meta property="article:tag" content="SSL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg"><link rel="shortcut icon" href="/img/jckling/favicon.ico"><link rel="canonical" href="https://jckling.github.io/2020/10/12/Notes/GB/%E8%AF%81%E4%B9%A6%E7%9B%B8%E5%85%B3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google_site_verification" content="pZZt69mo0ndoxIJ1vjEe830lXbvD26aiVAZ-k0FWM5k"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?20b7797c0b5f4e821c1449cd4c6c98c8";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-164555720-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-164555720-1');
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'X.509 数字证书与 SSL/TLS',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-11-23 22:04:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/atom.xml" title="Jckling's Blog" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/jckling/avatar.jpg" onerror="onerror=null;src='/img/jckling/avatar_404.png'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">107</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">40</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-film"></i><span> Movie</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Jckling's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-film"></i><span> Movie</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">X.509 数字证书与 SSL/TLS</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2020-10-12T13:24:54.000Z" title="undefined 2020-10-12 21:24:54">2020-10-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Notes/">Notes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="X.509 数字证书与 SSL/TLS"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2020/10/12/Notes/GB/%E8%AF%81%E4%B9%A6%E7%9B%B8%E5%85%B3/#post-comment"><span class="waline-comment-count" id="/2020/10/12/Notes/GB/%E8%AF%81%E4%B9%A6%E7%9B%B8%E5%85%B3/"></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="X-509"><a href="#X-509" class="headerlink" title="X.509"></a>X.509</h2><h3 id="编码格式"><a href="#编码格式" class="headerlink" title="编码格式"></a>编码格式</h3><ol>
+<li>PEM</li>
+<li>DER</li>
+</ol>
+<h4 id="PEM-Privacy-Enhanced-Mail"><a href="#PEM-Privacy-Enhanced-Mail" class="headerlink" title="PEM (Privacy Enhanced Mail)"></a>PEM (Privacy Enhanced Mail)</h4><p>最常见的编码格式，BASE64 ASCII 编码，首尾都包含纯文本</p>
+<p>例如，证书请求文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN CERTIFICATE REQUEST-----</span><br><span class="line">MIIBJjCBzQIBADBrMQswCQYDVQQGEwJDTjEPMA0GA1UECAwG5YyX5LqsMQ8wDQYD</span><br><span class="line">VQQHDAbljJfkuqwxDjAMBgNVBAoMBUpIX0NBMRIwEAYDVQQLDAlKSF9DbGllbnQx</span><br><span class="line">FjAUBgNVBAMMDUpIX0NsaWVudF9SZXEwWTATBgcqhkjOPQIBBggqgRzPVQGCLQNC</span><br><span class="line">AARPUB7GFXr1Gj6FwkfTbsFXx6tDeY17YsVZBfUtvEPP9GMxgX9qpSi9uRdIYthx</span><br><span class="line">syw++GDy5jXaUfr1hxdSWqcJoAAwCgYIKoEcz1UBg3UDSAAwRQIhAOlRvyHNVmD9</span><br><span class="line">bNcuDByBmt97cTeAvbGDPgX7Fl97RqgNAiBMI321HHeTsOrR0ieP7yUB7tkNQCh7</span><br><span class="line">lRYDDYygq2ATAg&#x3D;&#x3D;</span><br><span class="line">-----END CERTIFICATE REQUEST-----</span><br></pre></td></tr></table></figure>
+
+<p>PEM 文件可以包含一个或多个证书</p>
+<ul>
+<li>FISCO BCOS 中的节点证书包含了服务器证书和节点本身的证书</li>
+</ul>
+<p>通常，PEM 文件后缀包括 <code>.pem</code>、<code>.key</code>、<code>.csr</code>、<code>.crt</code></p>
+<h4 id="DER-Distinguished-Encoding-Rules"><a href="#DER-Distinguished-Encoding-Rules" class="headerlink" title="DER (Distinguished Encoding Rules)"></a>DER (Distinguished Encoding Rules)</h4><p>二进制编码，不包含首尾文本，通常用于 Java ，文件后缀包括 <code>.der</code>、<code>.cer</code></p>
+<p><strong>注意：PEM 格式的文件和 DER 格式的文件可以相互转换</strong></p>
+<h3 id="文件后缀及内容（字段）"><a href="#文件后缀及内容（字段）" class="headerlink" title="文件后缀及内容（字段）"></a>文件后缀及内容（字段）</h3><p>PEM 格式的文件可以统一存储为后缀 <code>.pem</code> ，为了便于区分用途，假设根据文件内容设置不同的后缀</p>
+<p>此外，假设使用国密证书</p>
+<h4 id="私钥文件"><a href="#私钥文件" class="headerlink" title="私钥文件"></a>私钥文件</h4><p>私钥文件（Private Key），后缀为 <code>.key</code>，用于签名</p>
+<ol>
+<li>SM2 椭圆曲线公钥密码算法 –&gt; 生成公钥、私钥</li>
+<li>将私钥以 PEM 格式存储 –&gt; <code>.key</code> 文件</li>
+</ol>
+<h4 id="证书请求文件"><a href="#证书请求文件" class="headerlink" title="证书请求文件"></a>证书请求文件</h4><p>全称 Certificate Signing Request，后缀为 <code>.csr</code>，用于向服务器申请证书</p>
+<p>证书请求文件模板</p>
+<ul>
+<li>基于 Package x509</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> CertificateRequest <span class="keyword">struct</span> &#123;</span><br><span class="line">	Raw                      []<span class="keyword">byte</span> <span class="comment">// 完整的 ASN.1 DER 内容（证书，签名算法和签名）</span></span><br><span class="line">	RawTBSCertificateRequest []<span class="keyword">byte</span> <span class="comment">// 原始 ASN.1 DER 内容的证书部分</span></span><br><span class="line">	RawSubjectPublicKeyInfo  []<span class="keyword">byte</span> <span class="comment">// DER 编码的主体公钥信息</span></span><br><span class="line">	RawSubject               []<span class="keyword">byte</span> <span class="comment">// DER 编码的主体</span></span><br><span class="line"></span><br><span class="line">	Version            <span class="keyword">int</span>					<span class="comment">// 版本</span></span><br><span class="line">	Signature          []<span class="keyword">byte</span>				<span class="comment">// 签名</span></span><br><span class="line">	SignatureAlgorithm SignatureAlgorithm			<span class="comment">// 签名算法</span></span><br><span class="line"></span><br><span class="line">	PublicKeyAlgorithm PublicKeyAlgorithm			<span class="comment">// 公钥算法</span></span><br><span class="line">	PublicKey          <span class="keyword">interface</span>&#123;&#125;				<span class="comment">// 公钥</span></span><br><span class="line"></span><br><span class="line">	Subject pkix.Name					<span class="comment">// 主体名称</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Attributes is the dried husk of a bug and shouldn&#x27;t be used.</span></span><br><span class="line">	<span class="comment">// 提供关于证书持有者的额外信息</span></span><br><span class="line">	Attributes []pkix.AttributeTypeAndValueSET</span><br><span class="line"></span><br><span class="line">	Extensions []pkix.Extension				<span class="comment">// 原始的 X.509 扩展，序列化时被忽略</span></span><br><span class="line">	ExtraExtensions []pkix.Extension			<span class="comment">// 覆盖任何其它字段生成的扩展</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 主体的替用名称</span></span><br><span class="line">	DNSNames       []<span class="keyword">string</span></span><br><span class="line">	EmailAddresses []<span class="keyword">string</span></span><br><span class="line">	IPAddresses    []net.IP</span><br><span class="line">	<span class="comment">// 改动，砍掉了 URI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="证书文件"><a href="#证书文件" class="headerlink" title="证书文件"></a>证书文件</h4><p>全称 Certificate，后缀为 <code>.crt</code>，用于身份认证</p>
+<ul>
+<li>版本</li>
+<li>序列号</li>
+<li>签名算法</li>
+<li>颁发者</li>
+<li>有效期</li>
+<li>主体</li>
+<li>主体公钥</li>
+<li>颁发者 ID（可选）</li>
+<li>主体 ID（可选）</li>
+<li>扩展（可选）</li>
+<li>签名</li>
+</ul>
+<img src="https://i.loli.net/2021/06/06/aXr4yN9itm361R8.png" width="65%">
+
+<p>证书链即包含多个层级的证书</p>
+<img src="https://i.loli.net/2021/06/06/pVNzcAfEWqoUKZh.png" width="65%">
+
+<p>证书文件模板</p>
+<ul>
+<li>基于 Package x509</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Certificate <span class="keyword">struct</span> &#123;</span><br><span class="line">	Raw                     []<span class="keyword">byte</span> <span class="comment">// 完整的 ASN.1 DER 内容（证书，签名算法和签名）</span></span><br><span class="line">	RawTBSCertificate       []<span class="keyword">byte</span> <span class="comment">// 原始 ASN.1 DER 内容的证书部分</span></span><br><span class="line">	RawSubjectPublicKeyInfo []<span class="keyword">byte</span> <span class="comment">// DER 编码的主体公钥信息</span></span><br><span class="line">	RawSubject              []<span class="keyword">byte</span> <span class="comment">// DER 编码的主体</span></span><br><span class="line">	RawIssuer               []<span class="keyword">byte</span> <span class="comment">// DER 编码的颁发者</span></span><br><span class="line"></span><br><span class="line">	Signature          []<span class="keyword">byte</span>					<span class="comment">// 签名</span></span><br><span class="line">	SignatureAlgorithm SignatureAlgorithm				<span class="comment">// 签名算法</span></span><br><span class="line"></span><br><span class="line">	PublicKeyAlgorithm PublicKeyAlgorithm				<span class="comment">// 公钥算法</span></span><br><span class="line">	PublicKey          <span class="keyword">interface</span>&#123;&#125;					<span class="comment">// 公钥</span></span><br><span class="line"></span><br><span class="line">	Version             <span class="keyword">int</span>							<span class="comment">// 版本</span></span><br><span class="line">	SerialNumber        *big.Int						<span class="comment">// 序列号</span></span><br><span class="line">	Issuer              pkix.Name						<span class="comment">// 颁发者</span></span><br><span class="line">	Subject             pkix.Name						<span class="comment">// 主体</span></span><br><span class="line">	NotBefore, NotAfter time.Time <span class="comment">// Validity bounds.			// 有效期</span></span><br><span class="line">	KeyUsage            KeyUsage						<span class="comment">// 用途（可选）</span></span><br><span class="line"></span><br><span class="line">	Extensions []pkix.Extension						<span class="comment">// 原始的X.509扩展，序列化时被忽略</span></span><br><span class="line">	ExtraExtensions []pkix.Extension					<span class="comment">// 覆盖任何其它字段生成的扩展</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// UnhandledCriticalExtensions contains a list of extension IDs that</span></span><br><span class="line">	<span class="comment">// were not (fully) processed when parsing. Verify will fail if this</span></span><br><span class="line">	<span class="comment">// slice is non-empty, unless verification is delegated to an OS</span></span><br><span class="line">	<span class="comment">// library which understands all the critical extensions.</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// Users can access these extensions using Extensions and can remove</span></span><br><span class="line">	<span class="comment">// elements from this slice if they believe that they have been</span></span><br><span class="line">	<span class="comment">// handled.</span></span><br><span class="line">	UnhandledCriticalExtensions []asn1.ObjectIdentifier	<span class="comment">// 扩展</span></span><br><span class="line"></span><br><span class="line">	ExtKeyUsage        []ExtKeyUsage           <span class="comment">// 密钥扩展用途的序列</span></span><br><span class="line">	UnknownExtKeyUsage []asn1.ObjectIdentifier <span class="comment">// 遇到的本包不能识别的密钥扩展用途</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 改动，增加了字段 BasicConstraintsValid</span></span><br><span class="line">	BasicConstraintsValid <span class="keyword">bool</span> 	<span class="comment">// 基本的有效性约束，如果以下两个字段有值则为真</span></span><br><span class="line">	IsCA                  <span class="keyword">bool</span>	<span class="comment">// 是否为 CA</span></span><br><span class="line">	MaxPathLen            <span class="keyword">int</span>	<span class="comment">// </span></span><br><span class="line">	<span class="comment">// MaxPathLenZero indicates that BasicConstraintsValid==true and</span></span><br><span class="line">	<span class="comment">// MaxPathLen==0 should be interpreted as an actual maximum path length</span></span><br><span class="line">	<span class="comment">// of zero. Otherwise, that combination is interpreted as MaxPathLen</span></span><br><span class="line">	<span class="comment">// not being set.</span></span><br><span class="line">	MaxPathLenZero <span class="keyword">bool</span>			<span class="comment">// </span></span><br><span class="line"></span><br><span class="line">	SubjectKeyId   []<span class="keyword">byte</span>		<span class="comment">// 主体 ID</span></span><br><span class="line">	AuthorityKeyId []<span class="keyword">byte</span>		<span class="comment">// 颁发者 ID</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// RFC 5280, 4.2.2.1 (认证信息存储)</span></span><br><span class="line">	OCSPServer            []<span class="keyword">string</span></span><br><span class="line">	IssuingCertificateURL []<span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 主体的替用名称</span></span><br><span class="line">	DNSNames       []<span class="keyword">string</span></span><br><span class="line">	EmailAddresses []<span class="keyword">string</span></span><br><span class="line">	IPAddresses    []net.IP</span><br><span class="line">	<span class="comment">// 改动，砍掉了 URI</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 名称约束</span></span><br><span class="line">	PermittedDNSDomainsCritical <span class="keyword">bool</span> <span class="comment">// 如果为真，则名称约束被标记为关键的（critical）</span></span><br><span class="line">	PermittedDNSDomains         []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// 改动，只保留两项</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// CRL 分发点（证书吊销列表）</span></span><br><span class="line">	CRLDistributionPoints []<span class="keyword">string</span></span><br><span class="line">	PolicyIdentifiers []asn1.ObjectIdentifier</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="国密改造细节"><a href="#国密改造细节" class="headerlink" title="国密改造细节"></a>国密改造细节</h3><p>在 Package x509 的基础上进行改造</p>
+<p>数字证书的每项都有对象标识 <a target="_blank" rel="noopener" href="http://gmssl.org/docs/oid.html">OID</a>， SM2 数字证书与标准 X.509 证书的主要区别就是公钥算法、公钥参数、签名算法的标识不同</p>
+<p>SignatureAlgorithm</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SM2WithSM3</span><br><span class="line">SM2WithSHA1</span><br><span class="line">SM2WithSHA256</span><br></pre></td></tr></table></figure>
+
+<p>algoName</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SM2WithSM3:       &quot;SM2-SM3&quot;,</span><br><span class="line">SM2WithSHA1:      &quot;SM2-SHA1&quot;,</span><br><span class="line">SM2WithSHA256:    &quot;SM2-SHA256&quot;,</span><br></pre></td></tr></table></figure>
+
+<p>oidSignature</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">oidSignatureSM2WithSM3      &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 501&#125;</span><br><span class="line">oidSignatureSM2WithSHA1     &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 502&#125;</span><br><span class="line">oidSignatureSM2WithSHA256   &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 503&#125;</span><br><span class="line"></span><br><span class="line">oidSM3     &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 401, 1&#125;</span><br><span class="line">oidHashSM3 &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 401&#125;</span><br></pre></td></tr></table></figure>
+
+<p>signatureAlgorithmDetails</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var signatureAlgorithmDetails &#x3D; []struct &#123;</span><br><span class="line">	algo       SignatureAlgorithm</span><br><span class="line">	oid        asn1.ObjectIdentifier</span><br><span class="line">	pubKeyAlgo PublicKeyAlgorithm</span><br><span class="line">	hash       Hash</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;SM2WithSM3, oidSignatureSM2WithSM3, ECDSA, SM3&#125;,</span><br><span class="line">&#123;SM2WithSHA1, oidSignatureSM2WithSHA1, ECDSA, SHA1&#125;,</span><br><span class="line">&#123;SM2WithSHA256, oidSignatureSM2WithSHA256, ECDSA, SHA256&#125;,</span><br></pre></td></tr></table></figure>
+
+<p>oidNamed</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">oidNamedCurveP256SM2 &#x3D; asn1.ObjectIdentifier&#123;1, 2, 156, 10197, 1, 301&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码演示"><a href="#代码演示" class="headerlink" title="代码演示"></a>代码演示</h3><ol>
+<li>自签证书</li>
+</ol>
+<ul>
+<li>Root CA 使用自己的私钥对证书签名，生成自签证书</li>
+</ul>
+<ol start="2">
+<li>证书文件</li>
+</ol>
+<ul>
+<li>CA 直接使用 Client 提供的公钥进行证书签发</li>
+</ul>
+<ol start="3">
+<li>证书请求文件 –&gt; 证书文件</li>
+</ol>
+<ul>
+<li>Client 向 CA 发送证书请求文件</li>
+<li>CA 使用证书请求文件中的信息签发证书</li>
+<li>CA 将证书文件返回给 Client</li>
+</ul>
+<h2 id="SSL-TLS"><a href="#SSL-TLS" class="headerlink" title="SSL/TLS"></a>SSL/TLS</h2><p>应用层协议</p>
+<ul>
+<li>以 TCP 连接为基础（传输层）</li>
+</ul>
+<h3 id="原理-三次握手"><a href="#原理-三次握手" class="headerlink" title="原理 - 三次握手"></a>原理 - 三次握手</h3><img src="https://i.loli.net/2021/06/06/c7u1at4ZTGeoV8H.png" width="65%">
+
+<ol>
+<li><p>SYN、SYN ACK、ACK</p>
+<ul>
+<li>TCP 三次握手，建立 TCP 连接</li>
+</ul>
+</li>
+<li><p>ClientHello</p>
+<ul>
+<li>Client 发送 Hello<ul>
+<li>协议版本（protocol version）</li>
+<li>Client 随机数（用于后续的三次握手）</li>
+<li>支持的密码套件（cipher suites）</li>
+<li>支持的压缩算法（compression methods）</li>
+<li>支持的扩展（extensions）</li>
+<li>可选的 session id （恢复 resume）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ServerHello、Certificate、ServerHelloDone</p>
+<ul>
+<li>Server 发送 Hello<ul>
+<li>选择的协议版本</li>
+<li>Server 随机数</li>
+<li>选择的密码套件</li>
+<li>选择的压缩算法</li>
+<li>一系列扩展</li>
+<li>session id</li>
+</ul>
+</li>
+<li>Server 发送证书<ul>
+<li>Server 主机名</li>
+<li>Server 使用的公钥</li>
+<li>可信第三方签名（CA）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ClientKeyExchange、ChangeCipherSpec、Finished</p>
+<ul>
+<li>Client 验证证书，提供密钥交换的信息</li>
+<li>Client 生成 pre Master Key（取决于密钥生成算法，通常是随机数，用于生成对称密钥）</li>
+<li>Client 使用 Server 公钥加密 pre Master Key，并发送给 Server</li>
+</ul>
+</li>
+<li><p>ChangeCipherSpec、Finished</p>
+<ul>
+<li>Server 解密 pre Master Key，利用 MAC 验证消息完整性</li>
+<li>返回加密的 “Finished” 消息</li>
+</ul>
+</li>
+</ol>
+<p>Client 和 Server 使用相同的参数生成对称密钥，用于会话消息的加密，因此也称为会话密钥。</p>
+<p><em>容易混淆的说法：将密钥称为加密密钥</em></p>
+<p>国密算法要求双向认证</p>
+<ul>
+<li>在 3. 上多一步，Server 向 Client 要求证书</li>
+<li>在 4. 上多一步，Client 向 Server 提供自己的证书（证明身份）</li>
+</ul>
+<h3 id="代码演示-1"><a href="#代码演示-1" class="headerlink" title="代码演示"></a>代码演示</h3><p>Server</p>
+<ol>
+<li>Root CA 证书</li>
+<li>Server 证书</li>
+<li>Server 私钥</li>
+</ol>
+<p>Client</p>
+<ol>
+<li>Root CA 证书</li>
+<li>Client 证书</li>
+<li>Client 私钥</li>
+</ol>
+<p>Server 与 Client 的逻辑基本一致</p>
+<ul>
+<li>读取自己的公钥证书和私钥</li>
+<li>载入证书（链）、根证书<ul>
+<li>提供自己的证书</li>
+<li>验证对方的证书</li>
+</ul>
+</li>
+<li>配置 TLS<ul>
+<li>认证方式、证书（链）、根证书集合</li>
+</ul>
+</li>
+<li>创建通道进行监听 / 发起连接请求</li>
+</ul>
+<h2 id="区块链身份认证方案"><a href="#区块链身份认证方案" class="headerlink" title="区块链身份认证方案"></a>区块链身份认证方案</h2><h3 id="FISCO-BCOS"><a href="#FISCO-BCOS" class="headerlink" title="FISCO BCOS"></a>FISCO BCOS</h3><blockquote>
+<p>FISCO BCOS网络采用面向CA的准入机制，支持任意多级的证书结构，保障信息保密性、认证性、完整性、不可抵赖性。</p>
+</blockquote>
+<ol>
+<li>使用 <code>openssl</code> 命令</li>
+<li>一般情况，三级结构<ul>
+<li>链证书</li>
+<li>机构证书</li>
+<li>节点/SDK 证书</li>
+</ul>
+</li>
+</ol>
+<img src="https://i.loli.net/2021/06/06/NaWhbnlxfGmAKuM.png" width="65%">
+
+<p>使用证书请求文件申请证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CA</span></span><br><span class="line">ca.crt      <span class="comment"># 链证书</span></span><br><span class="line">ca.key      <span class="comment"># 链私钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Agency</span></span><br><span class="line">ca.crt      <span class="comment"># 链证书</span></span><br><span class="line">agency.crt  <span class="comment"># 机构证书</span></span><br><span class="line">agency.csr  <span class="comment"># 机构证书请求文件</span></span><br><span class="line">agency.key  <span class="comment"># 机构私钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Node</span></span><br><span class="line">ca.crt      <span class="comment"># 链证书</span></span><br><span class="line">node.crt    <span class="comment"># 节点证书  &lt;-- 包括节点证书和机构证书信息</span></span><br><span class="line">node.key    <span class="comment"># 节点私钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># SDK</span></span><br><span class="line">ca.crt      <span class="comment"># 链证书</span></span><br><span class="line">sdk.crt     <span class="comment"># SDK 证书  &lt;-- 包括节点证书和机构证书信息</span></span><br><span class="line">sdk.key     <span class="comment"># SDK 私钥</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Fabric"><a href="#Fabric" class="headerlink" title="Fabric"></a>Fabric</h3><p>Fabric CA 在 Fabric 中的架构</p>
+<img src="https://i.loli.net/2021/06/06/2ZW9zgS3VTELRfM.jpg" width="80%">
+
+<p>Fabric CA 层级架构</p>
+<img src="https://i.loli.net/2021/06/06/JZalsgCcIroQexP.png" width="65%">
+
+<p>CA 服务器</p>
+<ul>
+<li>TLS CA</li>
+<li>ORG CA</li>
+<li>TCA（transaction）</li>
+</ul>
+<p>使用用户名密码获得证书</p>
+<ol>
+<li>注册 Register：获得凭据</li>
+<li>登记 Enroll：返回私钥、公钥证书、CA 证书链</li>
+</ol>
+<h2 id="典型-PKI-架构"><a href="#典型-PKI-架构" class="headerlink" title="典型 PKI 架构"></a>典型 PKI 架构</h2><p>组成部分</p>
+<ul>
+<li>证书</li>
+<li>信任链<ul>
+<li>根证书、中间证书、…</li>
+</ul>
+</li>
+<li>证书颁发机构<ul>
+<li>Root CA：信任锚</li>
+</ul>
+</li>
+</ul>
+<img src="https://i.loli.net/2021/06/06/Ex6JGDkjv72TfnM.png" width="65%">
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>树形层级架构</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Root CA                       <span class="comment"># 信任锚</span></span><br><span class="line">├─Intermediate CA1            <span class="comment"># 为类型 A 的节点签发证书</span></span><br><span class="line">|    ├─ Client1-Cert</span><br><span class="line">|    ├─ Client2-Cert</span><br><span class="line">|    └─ ...</span><br><span class="line">├─Intermediate CA2            <span class="comment"># 为类型 B 的节点签发证书</span></span><br><span class="line">|    ├─ ClientA-Cert</span><br><span class="line">|    ├─ ClientB-Cert</span><br><span class="line">|    └─ ...</span><br><span class="line">└─ ...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<ol>
+<li><p>FISCO BCOS 直接使用 <code>openssl</code> 进行签发，使用一个文件夹存储私钥、证书</p>
+<ul>
+<li>节点的黑名单机制，未提到撤销证书<ul>
+<li>优先级：黑名单 &gt; 白名单</li>
+</ul>
+</li>
+<li>生成证书请求文件向服务器续期</li>
+</ul>
+</li>
+<li><p>Fabric 结合数据库或 LDAP ，使用注册登记机制，通过 MSP 模块（成员服务提供者）管理私钥、证书</p>
+<ul>
+<li>向服务器进行证书撤销或续期</li>
+</ul>
+</li>
+</ol>
+<p>都是向服务器申请 CA 证书（链），以及签发证书。</p>
+<h2 id="参阅"><a href="#参阅" class="headerlink" title="参阅"></a>参阅</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.ssl.com/guide/pem-der-crt-and-cer-x-509-encodings-and-conversions/">PEM, DER, CRT, and CER: X.509 Encodings and Conversions</a></li>
+<li><a target="_blank" rel="noopener" href="https://golang.org/pkg/crypto/x509/">Package x509</a></li>
+<li><a target="_blank" rel="noopener" href="https://wizardforcel.gitbooks.io/golang-stdlib-ref/content/35.html">Go 标准库 中文参考 package x509</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cloudflare.com/zh-cn/learning/ssl/transport-layer-security-tls/">什么是传输层安全性（TLS）？</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.thesslstore.com/blog/explaining-ssl-handshake/">Taking a Closer Look at the SSL/TLS Handshake</a></li>
+<li><a target="_blank" rel="noopener" href="https://crypto.stackexchange.com/questions/27131/differences-between-the-terms-pre-master-secret-master-secret-private-key">Differences between the terms “pre-master secret”, “master secret”, “private key”, and “shared secret”?</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.thesslstore.com/blog/how-pki-works/">Your Guide to How PKI Works &amp; Secures Your Organization</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.apigee.com/api-platform/system-administration/about-ssl#tlsterminology">TLS terminology</a></li>
+<li><a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc5246">RFC 5246 - The Transport Layer Security (TLS) Protocol Version 1.2</a></li>
+</ul>
+<h2 id="关于国密-TLS"><a href="#关于国密-TLS" class="headerlink" title="关于国密 TLS"></a>关于国密 TLS</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.wosign.com/FAQ/faq_2019062501.htm">国密SSL协议是什么？与标准TLS协议的区别</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1610721">详解国密SSL ECC_SM4_SM3套件</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/705752">部署国密SSL证书，如何兼容国际主流浏览器？</a></li>
+</ul>
+<p>市面产品</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.wosign.com/sm2_https/sm2_https.htm">国密SM2 SSL证书全生态支持与全球信任解决方案</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.sinogrid.com/sino/2017/0524/218.html">慧敏应用交付网关基于国密算法的SSL双证书认证及加解密实现</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Jckling</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://jckling.github.io/2020/10/12/Notes/GB/%E8%AF%81%E4%B9%A6%E7%9B%B8%E5%85%B3/">https://jckling.github.io/2020/10/12/Notes/GB/证书相关/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://jckling.github.io" target="_blank">Jckling's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/X-509/">X.509</a><a class="post-meta__tags" href="/tags/TLS/">TLS</a><a class="post-meta__tags" href="/tags/SSL/">SSL</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/jckling/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/jckling/wechat.jpg" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li></ul></div></div><div class="ads-wrap"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1035234274961147" data-ad-slot="3100725659" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/06/Notes/draft-ietf-oauth-v2-1-00/"><img class="prev-cover" src="https://i.loli.net/2021/06/14/Akr6osDLPtO4hjS.jpg" onerror="onerror=null;src='/img/jckling/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">RFC 草案 The OAuth 2.1 Authorization Framework 翻译</div></div></a></div><div class="next-post pull-right"><a href="/2020/10/08/Notes/MOOC/%E7%A7%91%E7%A0%94%E8%AF%9A%E4%BF%A1%E4%B8%8E%E5%AD%A6%E6%9C%AF%E8%A7%84%E8%8C%83/"><img class="next-cover" src="https://i.loli.net/2021/06/14/5YME1up7SJRvbZn.jpg" onerror="onerror=null;src='/img/jckling/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《科研诚信与学术规范》 2020秋</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="waline-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/jckling/avatar.jpg" onerror="this.onerror=null;this.src='/img/jckling/avatar_404.png'" alt="avatar"/></div><div class="author-info__name">Jckling</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">107</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">40</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jckling"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">欢迎访问本站 🥳 <br/>评论需要审核，请不要重复提交~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#X-509"><span class="toc-number">1.</span> <span class="toc-text">X.509</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">编码格式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PEM-Privacy-Enhanced-Mail"><span class="toc-number">1.1.1.</span> <span class="toc-text">PEM (Privacy Enhanced Mail)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DER-Distinguished-Encoding-Rules"><span class="toc-number">1.1.2.</span> <span class="toc-text">DER (Distinguished Encoding Rules)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%90%8E%E7%BC%80%E5%8F%8A%E5%86%85%E5%AE%B9%EF%BC%88%E5%AD%97%E6%AE%B5%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">文件后缀及内容（字段）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%81%E9%92%A5%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.1.</span> <span class="toc-text">私钥文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E8%AF%B7%E6%B1%82%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.2.</span> <span class="toc-text">证书请求文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.3.</span> <span class="toc-text">证书文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BD%E5%AF%86%E6%94%B9%E9%80%A0%E7%BB%86%E8%8A%82"><span class="toc-number">1.3.</span> <span class="toc-text">国密改造细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%BC%94%E7%A4%BA"><span class="toc-number">1.4.</span> <span class="toc-text">代码演示</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SSL-TLS"><span class="toc-number">2.</span> <span class="toc-text">SSL&#x2F;TLS</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86-%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="toc-number">2.1.</span> <span class="toc-text">原理 - 三次握手</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%BC%94%E7%A4%BA-1"><span class="toc-number">2.2.</span> <span class="toc-text">代码演示</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">区块链身份认证方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FISCO-BCOS"><span class="toc-number">3.1.</span> <span class="toc-text">FISCO BCOS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fabric"><span class="toc-number">3.2.</span> <span class="toc-text">Fabric</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B8%E5%9E%8B-PKI-%E6%9E%B6%E6%9E%84"><span class="toc-number">4.</span> <span class="toc-text">典型 PKI 架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E9%98%85"><span class="toc-number">6.</span> <span class="toc-text">参阅</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%9B%BD%E5%AF%86-TLS"><span class="toc-number">7.</span> <span class="toc-text">关于国密 TLS</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/11/22/Other/Datalog%20%E5%BC%95%E6%93%8E%20Souffl%C3%A9%20%E6%8C%87%E5%8D%97/" title="Datalog 引擎 Soufflé 指南"><img src="https://i.loli.net/2021/06/14/oSn9dxfYhEHClIe.jpg" onerror="this.onerror=null;this.src='/img/jckling/404.jpg'" alt="Datalog 引擎 Soufflé 指南"/></a><div class="content"><a class="title" href="/2021/11/22/Other/Datalog%20%E5%BC%95%E6%93%8E%20Souffl%C3%A9%20%E6%8C%87%E5%8D%97/" title="Datalog 引擎 Soufflé 指南">Datalog 引擎 Soufflé 指南</a><time datetime="2021-11-22T11:01:43.000Z" title="发表于 2021-11-22 19:01:43">2021-11-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/05/Jaeger/CVE-2020-12691%20%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E8%BF%BD%E8%B8%AA/" title="CVE-2020-12691 漏洞利用相关信息追踪"><img src="https://i.loli.net/2021/06/14/bk5UlhqE4DZJfYu.png" onerror="this.onerror=null;this.src='/img/jckling/404.jpg'" alt="CVE-2020-12691 漏洞利用相关信息追踪"/></a><div class="content"><a class="title" href="/2021/11/05/Jaeger/CVE-2020-12691%20%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E8%BF%BD%E8%B8%AA/" title="CVE-2020-12691 漏洞利用相关信息追踪">CVE-2020-12691 漏洞利用相关信息追踪</a><time datetime="2021-11-05T07:25:15.000Z" title="发表于 2021-11-05 15:25:15">2021-11-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/26/Other/LogiQL%20%E5%85%A5%E9%97%A8/" title="LogiQL 入门"><img src="https://developer.logicblox.com/wp-content/uploads/2017/12/prod-bg-panelfour.jpg" onerror="this.onerror=null;this.src='/img/jckling/404.jpg'" alt="LogiQL 入门"/></a><div class="content"><a class="title" href="/2021/10/26/Other/LogiQL%20%E5%85%A5%E9%97%A8/" title="LogiQL 入门">LogiQL 入门</a><time datetime="2021-10-26T08:15:05.000Z" title="发表于 2021-10-26 16:15:05">2021-10-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/12/Security/Gadget%20Inspector%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" title="Gadget Inspector 源码解析"><img src="https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg" onerror="this.onerror=null;this.src='/img/jckling/404.jpg'" alt="Gadget Inspector 源码解析"/></a><div class="content"><a class="title" href="/2021/10/12/Security/Gadget%20Inspector%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" title="Gadget Inspector 源码解析">Gadget Inspector 源码解析</a><time datetime="2021-10-12T03:41:30.000Z" title="发表于 2021-10-12 11:41:30">2021-10-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/11/Other/Python%20%E7%88%AC%E5%8F%96%20twitter%20%E6%95%B0%E6%8D%AE/" title="Python 爬取 twitter 数据"><img src="https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-banner-desktop.jpg.twimg.1920.jpg" onerror="this.onerror=null;this.src='/img/jckling/404.jpg'" alt="Python 爬取 twitter 数据"/></a><div class="content"><a class="title" href="/2021/10/11/Other/Python%20%E7%88%AC%E5%8F%96%20twitter%20%E6%95%B0%E6%8D%AE/" title="Python 爬取 twitter 数据">Python 爬取 twitter 数据</a><time datetime="2021-10-11T10:44:50.000Z" title="发表于 2021-10-11 18:44:50">2021-10-11</time></div></div></div></div><div class="card-widget ads-wrap"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1035234274961147" data-ad-slot="8787224657" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2021/06/14/2NXqsznriG8blc7.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Jckling</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>function loadWaline () {
+  function initWaline () {
+    const waline = new Waline(Object.assign({
+      el: '#waline-wrap',
+      serverURL: 'https://blog-comments-puce.vercel.app',
+      avatar: 'retro',
+      avatarCDN: 'https://sdn.geekzu.org/avatar/',
+      path: location.pathname,
+      visitor: false,
+      dark: 'html[data-theme="dark"]'
+    }, {"emoji":"https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji"}))
+  }
+
+  if (typeof Waline === 'function') initWaline() 
+  else getScript('https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js').then(initWaline)
+}
+
+if ('Waline' === 'Waline' || !false) {
+  if (false) btf.loadComment(document.getElementById('waline-wrap'),loadWaline)
+  else setTimeout(loadWaline, 0)
+} else {
+  function loadOtherComment () {
+    loadWaline()
+  }
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
